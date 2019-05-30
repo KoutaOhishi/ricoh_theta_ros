@@ -6,6 +6,7 @@
 #include "opencv2/core/ocl.hpp"
 #include "opencv2/opencv_modules.hpp"
 #include "image_transport/image_transport.h"
+#include "chrono"
 
 #define PI 3.1415926536
 
@@ -18,6 +19,8 @@ class Img_subscriber{
 
         ros::Subscriber sub_img;
         image_transport::Publisher pub_img;//image型のtopicのpublisherを宣言
+        image_transport::Publisher front_img_pub;
+        image_transport::Publisher back_img_pub;
 
     public:
         Img_subscriber(){
@@ -30,6 +33,9 @@ class Img_subscriber{
 
             image_transport::ImageTransport it(this->nh);
             this->pub_img = it.advertise(this->pub_img_name, 1);
+
+            this->front_img_pub = it.advertise("/ricoh_theta/perspective/front_image_raw", 1);
+            this->back_img_pub = it.advertise("/ricoh_theta/perspective/back_image_raw", 1);
         }
 
         cv::Point2f getInputPoint(int x, int y,int srcwidth, int srcheight)
@@ -66,14 +72,16 @@ class Img_subscriber{
 
         cv::Mat fisheye2perspective(cv::Mat input)
         {
+          std::chrono::system_clock::time_point  start, end; // 型は auto で可
+          start = std::chrono::system_clock::now(); // 計測開始時間
+
           //前後のカメラごとに画像をトリミング
-          cv::Mat input_front_img(input, cv::Rect(10, 10, 620, 620));
-          cv::Mat input_back_img(input, cv::Rect(670, 10, 620, 620));
+          cv::Mat input_front_img(input, cv::Rect(10, 10, 610, 610));
+          cv::Mat input_back_img(input, cv::Rect(660, 10, 610, 610));
 
           //展開用の画像を宣言
           cv::Mat front_img(input_front_img.rows, input_front_img.cols, CV_8UC3);
-          cv::Mat back_img(input_front_img.rows, input_front_img.cols, CV_8UC3);
-
+          cv::Mat back_img(input_back_img.rows, input_back_img.cols, CV_8UC3);
 
           //画像の回転
           cv::flip(input_front_img.t(), input_front_img, 1);
@@ -113,14 +121,42 @@ class Img_subscriber{
           }
 
 
+          //出力用の画像を宣言
+          cv::Mat result_img(input_front_img.rows, input_front_img.cols+input_back_img.cols, CV_8UC3);
 
-          return back_img;
-          //return input_front_img;
-          //return input_back_img;
+          //back_cameraの画像を半分にする
+          cv::Mat back_img_left(back_img, cv::Rect(0, 0, 305, 610));
+          cv::Mat back_img_right(back_img, cv::Rect(305, 0, 305, 610));
+
+          cv::Mat roi = result_img(cv::Rect(306, 0, front_img.cols, front_img.rows));
+          front_img.copyTo(roi);
+
+          roi = result_img(cv::Rect(915, 0, back_img_left.cols, back_img_left.rows));
+          back_img_left.copyTo(roi);
+
+          roi = result_img(cv::Rect(0, 0, back_img_right.cols, back_img_right.rows));
+          back_img_right.copyTo(roi);
+
+
+
+          end = std::chrono::system_clock::now();  // 計測終了時間
+          double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間
+          float fps = 1000.00 / elapsed;
+          printf("fps:[%f]\n", elapsed);
+
+          sensor_msgs::ImagePtr front_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", front_img).toImageMsg();
+          this->front_img_pub.publish(front_img_msg);
+          sensor_msgs::ImagePtr back_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", back_img).toImageMsg();
+          this->back_img_pub.publish(back_img_msg);
+
+
+          return result_img;
         }
 
         void sub_img_CB(const sensor_msgs::ImageConstPtr& msg)
         {
+            //ROS_INFO("Subscribed Image");
+
             //ROSのImage型からOpenCVで扱える形式に変換
             cv::Mat image = cv_bridge::toCvShare(msg, "bgr8")->image;
 
