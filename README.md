@@ -45,3 +45,9 @@ THETAから送られてくる sensor_msgs/Image型の画像は、Dual-Fisheyeと
   ```
   rosrun ricoh_theta_ros perspective_converter
   ```
+  topicのsubscribeの遅延がありますが、処理は速いです。  
+  歪みが多いので物体検出には向かないかも・・・。  
+
+## 参考
+- http://blog.livedoor.jp/tmako123-programming/archives/50769806.html  
+- https://qiita.com/dcm_kitade/items/6ff790fbb0a97913265b  
