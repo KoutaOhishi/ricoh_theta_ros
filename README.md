@@ -40,7 +40,11 @@ $ catkin_make
 
 - WiFi接続
   ```
-  $ roslaunch ricoh_theta_ros wifi_stream.launch
+  $ roscore
+
+  $ rosrun ricoh_theta_ros wifi_switcher.py
+
+  $ rosrun ricoh_theta_ros wifi_switcher.py
   ```
 
 ## THETAから得られる画像について(USB接続用)
