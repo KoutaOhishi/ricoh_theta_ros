@@ -19,7 +19,7 @@ from cv_bridge import CvBridge, CvBridgeError
 class WifiStreamer(): #API ver2.0
     def __init__(self):
         self.exe = "http://192.168.1.1:80/osc/commands/execute"
-        self.img_pub = rospy.Publisher("/ricoh_theta_ros/equirectangular/image_raw", Image, queue_size=1)
+        self.img_pub = rospy.Publisher("/ricoh_theta/equirectangular/image_raw", Image, queue_size=1)
 
     def handler(self, signal, frame):
         rospy.loginfo("### Shutting Down... ###")
