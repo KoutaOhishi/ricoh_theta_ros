@@ -6,11 +6,11 @@
 #include "opencv2/core/ocl.hpp"
 #include "opencv2/opencv_modules.hpp"
 #include "image_transport/image_transport.h"
-#include "chrono"
+
 
 #define PI 3.1415926536
 
-class Img_subscriber{
+class PerspectiveConverter{
     private:
         ros::NodeHandle nh;
 
@@ -23,13 +23,13 @@ class Img_subscriber{
         image_transport::Publisher back_img_pub;
 
     public:
-        Img_subscriber(){
-            this->sub_img_name = "/image_raw";
+        PerspectiveConverter(){
+            this->sub_img_name = "/ricoh_theta/image_raw";
             this->pub_img_name = "/ricoh_theta/perspective/image_raw/";
 
             ROS_INFO("sub_img_name:[%s]", this->sub_img_name.c_str());
 
-            this->sub_img = nh.subscribe(this->sub_img_name, 100, &Img_subscriber::sub_img_CB, this);
+            this->sub_img = nh.subscribe(this->sub_img_name, 100, &PerspectiveConverter::sub_img_CB, this);
 
             image_transport::ImageTransport it(this->nh);
             this->pub_img = it.advertise(this->pub_img_name, 1);
@@ -72,9 +72,6 @@ class Img_subscriber{
 
         cv::Mat fisheye2perspective(cv::Mat input)
         {
-          std::chrono::system_clock::time_point  start, end; // 型は auto で可
-          start = std::chrono::system_clock::now(); // 計測開始時間
-
           //前後のカメラごとに画像をトリミング
           cv::Mat input_front_img(input, cv::Rect(10, 10, 610, 610));
           cv::Mat input_back_img(input, cv::Rect(660, 10, 610, 610));
@@ -138,17 +135,10 @@ class Img_subscriber{
           back_img_right.copyTo(roi);
 
 
-
-          end = std::chrono::system_clock::now();  // 計測終了時間
-          double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間
-          float fps = 1000.00 / elapsed;
-          printf("fps:[%f]\n", elapsed);
-
           sensor_msgs::ImagePtr front_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", front_img).toImageMsg();
           this->front_img_pub.publish(front_img_msg);
           sensor_msgs::ImagePtr back_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", back_img).toImageMsg();
           this->back_img_pub.publish(back_img_msg);
-
 
           return result_img;
         }
@@ -174,10 +164,10 @@ class Img_subscriber{
 
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, "img_subscriber");
-    ROS_INFO("### START [img_subscriber] ###");
+    ros::init(argc, argv, "perspective_converter");
+    ROS_INFO("### START [PerspectiveConverter] ###");
 
-    Img_subscriber i;
+    PerspectiveConverter pc;
 
     ros::spin();
 }

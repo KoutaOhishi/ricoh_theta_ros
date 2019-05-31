@@ -1,12 +1,6 @@
 #!/bin/bash
 
-echo "##########################"
-echo "### Permission Setting ###"
-echo "##########################"
+echo "##################"
+echo "### PERMISSION ###"
+echo "##################"
 sudo chmod a+rw /dev/bus/usb/001/*
-
-
-echo "##################"
-echo "### ros_launch ###"
-echo "##################"
-roslaunch ricoh_theta_ros launch.launch

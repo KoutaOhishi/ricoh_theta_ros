@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="ricoh_theta_ros" type="image_convert_server.py" name="image_convert_server"  output="screen" />
+
+  <node pkg="ricoh_theta_ros" type="image_convert_client.py" name="image_convert_client"  output="screen" />
+</launch>

@@ -9,6 +9,17 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  message_generation
+)
+
+add_service_files(
+  FILES
+  DualFisheye2Equirectangular.srv
+)
+
+generate_messages(
+   DEPENDENCIES
+   sensor_msgs
 )
 
 find_package(OpenCV REQUIRED)
@@ -19,5 +30,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(img_show src/img_show.cpp)
-target_link_libraries(img_show ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(perspective_converter src/perspective_converter.cpp)
+target_link_libraries(perspective_converter ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(stitching src/stitching.cpp)
+target_link_libraries(stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
