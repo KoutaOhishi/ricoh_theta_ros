@@ -1,7 +1,13 @@
 # ricoh_theta_ros
+360度撮影できるカメラ（THETA）をROSで使えるようにするpackage。  
+USB接続とwifi接続の2種類のパターンがある。  
 
-## THETAの設定
-[YouTube](https://www.youtube.com/watch?v=O7-LXnPuFU0#action=share)を参考にしてくだい。
+## THETAの設定&起動方法
+- USB接続  
+  [YouTube](https://www.youtube.com/watch?v=O7-LXnPuFU0#action=share)
+
+- WiFi接続  
+  [公式サイト](https://support.theta360.com/ja/manual/v/content/prepare/prepare_06.html)
 
 ## ROSの設定
 ```
@@ -18,12 +24,26 @@ $ cd ~/catkin_ws/
 $ catkin_make
 ```
 
-## 起動方法
-```
-$ roslaunch ricoh_theta_ros camera.launch
-```
+## Network設定(wifi stream用)
+① WifiネットワークでTHETAに接続する。
+  - SSIDの例 ： THETAXS1234567.OSC
+  - Password : SSIDの数字がpassになる(上のだと1234567がpass)
 
-## THETAから得られる画像について
+② 接続名を"THETA"に変更する。  
+
+
+## 起動方法
+- USB接続
+  ```
+  $ roslaunch ricoh_theta_ros camera.launch
+  ```
+
+- WiFi接続
+  ```
+  $ roslaunch ricoh_theta_ros wifi_stream.launch
+  ```
+
+## THETAから得られる画像について(USB接続用)
 THETAから送られてくる sensor_msgs/Image型の画像は、Dual-Fisheyeという種類の画像になっています。  
 このままだと画像処理には向かないので、変換するノードを作りました。  
 

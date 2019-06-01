@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="ricoh_theta_ros" type="wifi_switcher.py" name="wifi_switcher"  output="screen" />
+
+  <node pkg="ricoh_theta_ros" type="wifi_streamer.py" name="wifi_streamer"  output="screen" />
+</launch>
